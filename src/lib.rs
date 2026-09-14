@@ -40,7 +40,7 @@ impl Shape for Tradacoms {
 
     fn shape(&self, stream: &Stream) -> Result<Shaped, ShapeError> {
         let segments = segment::segments(stream.bytes(), &DELIMITERS)
-            .map_err(|stop| stop.refused("edi-tradacoms"))?;
+            .map_err(|stop| ShapeError::refused("edi-tradacoms", stop))?;
         let message_type = segment::first(&segments, "MHD")
             .and_then(|mhd| mhd.component(1, 0, &DELIMITERS))
             .filter(|kind| !kind.is_empty())
