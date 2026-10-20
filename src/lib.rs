@@ -34,7 +34,7 @@ impl Shape for Tradacoms {
         &["application/edi-consent"]
     }
 
-    fn recognises(&self, bytes: &[u8]) -> bool {
+    fn recognizes(&self, bytes: &[u8]) -> bool {
         bytes.starts_with(b"STX=")
     }
 
@@ -142,13 +142,13 @@ CDT=5000000000001:BOB?'S+SHOP'\nMTR=5'\nEND=1'\n";
     }
 
     #[test]
-    fn the_shape_claims_edi_consent_and_recognises_stx_at_the_head() {
+    fn the_shape_claims_edi_consent_and_recognizes_stx_at_the_head() {
         assert_eq!(Tradacoms.technology(), "edi-tradacoms");
         assert_eq!(Tradacoms.media_types(), &["application/edi-consent"]);
-        assert!(Tradacoms.recognises(b"STX=ANA:1"));
-        assert!(!Tradacoms.recognises(b"STX+ANA"));
-        assert!(!Tradacoms.recognises(b"UNB+"));
-        assert!(!Tradacoms.recognises(b""));
+        assert!(Tradacoms.recognizes(b"STX=ANA:1"));
+        assert!(!Tradacoms.recognizes(b"STX+ANA"));
+        assert!(!Tradacoms.recognizes(b"UNB+"));
+        assert!(!Tradacoms.recognizes(b""));
 
         let shapes: [&dyn Shape; 1] = [&Tradacoms];
         let by_media = message::choose(&shapes, &stream(b"x", Some("application/EDI-Consent")));
