@@ -44,7 +44,7 @@ impl Shape for Tradacoms {
         let message_type = segment::first(&segments, "MHD")
             .and_then(|mhd| mhd.component(1, 0, &DELIMITERS))
             .filter(|kind| !kind.is_empty())
-            .map(|kind| String::from_utf8_lossy(&DELIMITERS.unreleased(kind)).into_owned());
+            .map(|kind| String::from_utf8_lossy_owned(DELIMITERS.unreleased(kind)));
         let media = stream.media_type().unwrap_or("application/edi-consent");
         Ok(Shaped {
             parts: segment::parts(&segments, media),
