@@ -39,7 +39,8 @@ impl Shape for Tradacoms {
     }
 
     fn shape(&self, stream: &Stream) -> Result<Shaped, ShapeError> {
-        let segments = segment::segments(stream.bytes(), &DELIMITERS)
+        let bytes = message::loaded(self.technology(), stream)?;
+        let segments = segment::segments(bytes, &DELIMITERS)
             .map_err(|stop| ShapeError::refused("edi-tradacoms", stop))?;
         let message_type = segment::first(&segments, "MHD")
             .and_then(|mhd| mhd.component(1, 0, &DELIMITERS))
@@ -151,10 +152,15 @@ CDT=5000000000001:BOB?'S+SHOP'\nMTR=5'\nEND=1'\n";
         assert!(!Tradacoms.recognizes(b""));
 
         let shapes: [&dyn Shape; 1] = [&Tradacoms];
-        let by_media = message::choose(&shapes, &stream(b"x", Some("application/EDI-Consent")));
+        let by_media =
+            message::choose(&shapes, &stream(b"x", Some("application/EDI-Consent"))).expect("held");
         assert_eq!(by_media.map(Shape::technology), Some("edi-tradacoms"));
-        let by_look = message::choose(&shapes, &stream(ORDERS, None));
+        let by_look = message::choose(&shapes, &stream(ORDERS, None)).expect("held");
         assert_eq!(by_look.map(Shape::technology), Some("edi-tradacoms"));
-        assert!(message::choose(&shapes, &stream(b"ISA*", None)).is_none());
+        assert!(
+            message::choose(&shapes, &stream(b"ISA*", None))
+                .expect("held")
+                .is_none()
+        );
     }
 }
